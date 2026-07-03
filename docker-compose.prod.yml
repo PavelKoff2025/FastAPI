@@ -1,0 +1,32 @@
+services:
+  api:
+    image: ${REGISTRY:-pavelkoff}/fastapi-app:${TAG:-latest}
+    container_name: fastapi-app
+    ports:
+      - "${PORT:-8000}:8000"
+    env_file:
+      - .env
+    environment:
+      WORKERS: ${WORKERS:-1}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  watchtower:
+    image: nickfedor/watchtower:latest
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      WATCHTOWER_POLL_INTERVAL: ${WATCHTOWER_POLL_INTERVAL:-30}
+      WATCHTOWER_LABEL_ENABLE: "true"
+      WATCHTOWER_CLEANUP: "true"
+      DOCKER_API_VERSION: ${DOCKER_API_VERSION:-1.54}
+    restart: unless-stopped

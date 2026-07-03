@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fastapi-app-config
+data:
+  APP_NAME: "FastAPI App"
+  APP_VERSION: "0.1.0"
+  DEBUG: "false"
+  HOST: "0.0.0.0"
+  PORT: "8000"
+  WORKERS: "2"
+  LOG_LEVEL: "info"
