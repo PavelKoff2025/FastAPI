@@ -12,13 +12,20 @@ AUTH_DIR="$REGISTRY_DIR/auth"
 
 mkdir -p "$CERTS_DIR" "$AUTH_DIR"
 
-if [ ! -f "$CERTS_DIR/registry.crt" ]; then
-  echo "Генерация TLS-сертификата для $REGISTRY_IP..."
+if echo "$REGISTRY_IP" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'; then
+  SAN="IP:$REGISTRY_IP,DNS:localhost"
+else
+  SAN="DNS:$REGISTRY_IP,DNS:localhost"
+fi
+
+if [ ! -f "$CERTS_DIR/registry.crt" ] || [ "$FORCE" = "1" ]; then
+  echo "Генерация TLS-сертификата для $REGISTRY_IP (SAN: $SAN)..."
   openssl req -x509 -newkey rsa:4096 \
     -keyout "$CERTS_DIR/registry.key" \
     -out "$CERTS_DIR/registry.crt" \
     -days 365 -nodes \
-    -subj "/CN=$REGISTRY_IP"
+    -subj "/CN=$REGISTRY_IP" \
+    -addext "subjectAltName=$SAN"
 fi
 
 echo "Создание htpasswd для пользователя $REGISTRY_USER..."

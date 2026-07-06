@@ -59,7 +59,7 @@ check: install ## Проверить, что приложение импорти
 
 registry-init: ## Инициализировать TLS-сертификаты и htpasswd для Registry
 	chmod +x registry/scripts/init.sh
-	REGISTRY_IP=$(REGISTRY_IP) REGISTRY_USER=$(REGISTRY_USER) REGISTRY_PASSWORD=$(REGISTRY_PASSWORD) \
+	FORCE=$(REGISTRY_FORCE) REGISTRY_IP=$(REGISTRY_IP) REGISTRY_USER=$(REGISTRY_USER) REGISTRY_PASSWORD=$(REGISTRY_PASSWORD) \
 		registry/scripts/init.sh
 
 registry-up: ## Запустить приватный Docker Registry (TLS + auth)
