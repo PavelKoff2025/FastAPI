@@ -24,9 +24,10 @@ services:
     container_name: watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - ${DOCKER_CONFIG_PATH:-/root/.docker/config.json}:/config.json:ro
     environment:
       WATCHTOWER_POLL_INTERVAL: ${WATCHTOWER_POLL_INTERVAL:-30}
-      WATCHTOWER_LABEL_ENABLE: "true"
       WATCHTOWER_CLEANUP: "true"
-      DOCKER_API_VERSION: ${DOCKER_API_VERSION:-1.54}
+      DOCKER_API_VERSION: ${DOCKER_API_VERSION:-1.52}
+      DOCKER_CONFIG: /
     restart: unless-stopped

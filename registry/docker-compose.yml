@@ -15,6 +15,8 @@ services:
       - registry-data:/var/lib/registry
       - ./certs:/certs:ro
       - ./auth:/auth:ro
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
     healthcheck:
       test: ["CMD", "wget", "--no-check-certificate", "-q", "--spider", "https://localhost:5000/v2/"]
       interval: 30s

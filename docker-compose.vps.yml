@@ -15,6 +15,8 @@ services:
       - registry-data:/var/lib/registry
       - ./registry/certs:/certs:ro
       - ./registry/auth:/auth:ro
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
     healthcheck:
       test: ["CMD", "wget", "--no-check-certificate", "-q", "--spider", "https://localhost:5000/v2/"]
       interval: 30s
@@ -50,11 +52,12 @@ services:
     container_name: watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - ${DOCKER_CONFIG_PATH:-/root/.docker/config.json}:/config.json:ro
     environment:
       WATCHTOWER_POLL_INTERVAL: ${WATCHTOWER_POLL_INTERVAL:-30}
-      WATCHTOWER_LABEL_ENABLE: "true"
       WATCHTOWER_CLEANUP: "true"
-      DOCKER_API_VERSION: ${DOCKER_API_VERSION:-1.54}
+      DOCKER_API_VERSION: ${DOCKER_API_VERSION:-1.52}
+      DOCKER_CONFIG: /
     restart: unless-stopped
     depends_on:
       - api
