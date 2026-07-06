@@ -1,55 +1,66 @@
 # FastAPI App
 
-Шаблонное FastAPI-приложение с Docker и настройками для деплоя.
+Production-ready шаблон FastAPI с приватным Docker Registry, автодеплоем через Watchtower и Makefile.
 
 ## Структура
 
 ```
-app/
-  config.py        # настройки через переменные окружения
-  routers/         # маршруты API
-main.py            # точка входа
-deploy/k8s/        # манифесты Kubernetes
-docker-compose.yml # локальный запуск
-Dockerfile         # production-образ
+main.py                  # точка входа
+app/                     # конфигурация и роутеры
+registry/                # приватный Docker Registry (TLS + htpasswd)
+docker-compose.vps.yml   # полный стек: Registry + API + Watchtower
+docker-compose.prod.yml  # API + Watchtower
+Makefile                 # сборка, push в Registry, проверка каталога
+deploy/VPS.md            # инструкция деплоя на VPS
 ```
 
-## Локальная разработка
+## Быстрый старт (локально)
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+make dev                 # разработка
+make registry-init       # TLS + auth для Registry
+make registry-up         # запуск Registry
+make bp                  # сборка + push в localhost:5000
+make registry-catalog    # проверка https://localhost:5000/v2/_catalog
 ```
 
-Документация API: http://localhost:8000/docs
+## Деплой на VPS
 
-## Docker
+Полная инструкция: [deploy/VPS.md](deploy/VPS.md)
 
 ```bash
-cp .env.example .env
-docker compose up --build
+# На VPS
+make registry-init REGISTRY_IP=<VPS_IP>
+make registry-trust REGISTRY_HOST=<VPS_IP>:5000
+make vps-up REGISTRY_HOST=<VPS_IP>:5000
+
+# С локальной машины
+make bp REGISTRY_HOST=<VPS_IP>:5000 TAG=v1.0.0
+make registry-catalog REGISTRY_IP=<VPS_IP>
 ```
 
-## Kubernetes
+## Makefile
 
 ```bash
-docker build -t fastapi-app:latest .
-kubectl apply -f deploy/k8s/
+make help                # все команды
 ```
 
-Перед деплоем обновите `host` в `deploy/k8s/ingress.yaml`.
+| Команда | Описание |
+|---------|----------|
+| `make bp` | Сборка + push в приватный Registry (TAG + latest) |
+| `make registry-init` | Сертификаты TLS + htpasswd |
+| `make registry-catalog` | Проверка `https://<ip>:5000/v2/_catalog` |
+| `make vps-up` | Registry + API + Watchtower |
+| `make docker-login` | Авторизация в Registry |
 
 ## Эндпоинты
 
-| Метод | Путь     | Описание              |
-|-------|----------|-----------------------|
-| GET   | `/`      | Приветствие           |
-| GET   | `/health`| Liveness probe        |
-| GET   | `/ready` | Readiness probe       |
+| Метод | Путь | Описание |
+|-------|------|----------|
+| GET | `/` | Приветствие |
+| GET | `/health` | Liveness probe |
+| GET | `/ready` | Readiness probe |
 
-## Переменные окружения
+## Лицензия
 
-См. `.env.example`.
+MIT

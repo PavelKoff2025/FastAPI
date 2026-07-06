@@ -8,3 +8,8 @@ venv/
 .mypy_cache/
 .ruff_cache/
 .DS_Store
+
+# Private Registry (генерируются локально)
+registry/certs/*.crt
+registry/certs/*.key
+registry/auth/htpasswd
